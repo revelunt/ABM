@@ -9,22 +9,20 @@ patches-own  ;; each patches provides media exposure
 ]
 
 turtles-own
-[
-  attitudes   ;; an attitude of an agent (-3: oppose or +3: support). We defined the "supporting issue" means he or she is a Democrat.
-
+[ attitudes   ;; an attitude of an agent (-3: oppose or +3: support). We defined the "supporting issue" means he or she is a Democrat.
   prior-attitudes  ;; attitudes at prior waves
-
   total_social  ;; sum of attitudes around me from social networks
-
-  total_media   ;; sum of media influence
-
+  total_media_valence  ;; valence of media influence
+  total_media   ;; sum of media exposure
   tally  ;; sum of one's own attitudes, total, and mass media exposure
-
-
   my-connected-neighbors  ;; other actors in their networks
+  agree ;; degree of agreement on his or her social networks
   disagree ;; degree of disagreement on his or her social networks
-
-  inner-bound-of-tolerance  ;; an agent-set for bounded-confidence model
+  diversity
+  total
+  rep
+  ind
+  dem
 
 ]
 
@@ -32,7 +30,7 @@ to setup
   clear-all
   clear-all-plots
 
-  resize-world 0 (world-size-x - 1) 0 (world-size-y - 1) ;; defining the size of the society (number of patches
+  resize-world 0 (world-size-x - 1) 0 (world-size-y - 1) ;; defining the size of the society (number of patches)
   set number_of_agents (world-size-x * world-size-y)     ;; one agent per patch
   set-patch-size 360 / world-size-y                      ;; setting patch size for good looking
 
@@ -40,8 +38,7 @@ to setup
 
   ask turtles
     [ set attitudes -3 + random 7 ; randomly return a range of values from -3 to +3
-      recolor-turtles
-      recolor-patch ]
+      recolor-turtles ]
 
   reset-ticks
 end
@@ -61,23 +58,23 @@ end
 ;; this is master behavioral schedule of an agent (= turtles)
 to go
 
-  if count turtles with [ attitudes > -3 ] = 0 or count turtles with [ attitudes < 3 ] = 0 [stop]
-  if ticks >= 500 [stop]
+  if count turtles with [ attitudes > 0 ] = 0 or count turtles with [ attitudes < 0 ] = 0 [stop] ;; if one of the partisan camp disappears completely, the model stops
+  if ticks >= 300 [stop] ;; after 300 iteration, model stops
 
-  ask turtles [ watch-media ]
   ask turtles [ select-discussion-partners ]
   ask turtles [ discuss-politics ]
+  ask turtles [ watch-media ]
   ask turtles [ update-opinion ]
 
   ;; for display purposes
   ask turtles [ recolor-turtles ]
-  ask turtles [ recolor-patch ]
 
   tick
 
   ;; reset for next tick (have to place after "tick" in order to avoid conflicts with plot updates)
   ask patches [set blue-media 0]
   ask patches [set red-media 0]
+
 end
 
 
@@ -101,12 +98,12 @@ to watch-media  ;; how "selective" exposure map into this submodel?
 
   [ ;; if neutral
     ifelse attitudes = 0
-    [ if random-float 1 < exposure-to-pro-media [ set red-media random 4 ]
-      if random-float 1 < exposure-to-pro-media [ set blue-media random 4 ]  ;; randomly get blue and red media exposure, to varying (random) degree from 0 to 3
+    [ if random-float 1 <= exposure-to-pro-media
+      [ set red-media random (4 * exposure-to-pro-media)
+        set blue-media random (4 * exposure-to-pro-media) ]  ;; randomly get blue and red media exposure, to varying (random) degree from 0 to 3
 
-      if exposure-to-pro-media < 1  ;; (global) if exposure-to-pro-media parameter is less than 1, do following...
-      [ set red-media (red-media * exposure-to-pro-media)
-        set blue-media (blue-media * exposure-to-pro-media) ]
+     ;; (global) if exposure-to-pro-media parameter is less than 1, above formula also takes care of the discounting factor
+
     ]
 
   [ ;; finally, for democrats,
@@ -121,14 +118,24 @@ to watch-media  ;; how "selective" exposure map into this submodel?
   ] ;; end of neutral & democrat
 
 
-    if exposure-to-counter-media > 0   ;; (global) any setting for exposure-to-counter-media value greater than zero
+  if exposure-to-counter-media > 0   ;; (global) any setting for exposure-to-counter-media value greater than zero
 
-  [ if random-float 1 < exposure-to-counter-media  ;; if random num is less than counter-explosure threshold (from zero to 1),
-    [ if attitudes < 0 [ set blue-media blue-media + 1 ]  ;; for republicans increase blue media exposure by one
-      if attitudes > 0 [ set red-media red-media + 1 ]    ;; for democrats increase red media exposure by one
-  ]]
+  [ ifelse attitudes < 0 ;; if republicans
+     [ set blue-media exposure-to-counter-media * (exposure-to-pro-media * red-media) ]
+     [ ;; if neutral
+      ifelse attitudes = 0
+      [ set red-media random (4 * exposure-to-pro-media)
+        set blue-media random (4 * exposure-to-pro-media)  ;; randomly get blue and red media exposure, to varying (random) degree from 0 to 3
+      ]
+      [ ;; finally, for democrats,
+      set red-media exposure-to-counter-media * (exposure-to-pro-media * blue-media) ] ;; end of democrat only
+      ] ;; end of neutral & democrat
 
-  set total_media (blue-media - red-media) ;; how much of "support-side" considerations from media exposure? any value greater than zero means media favors supporting the issue (=democrat-oriented)
+  ]
+
+  ;; how much of "support-side" considerations from media exposure? any value greater than zero means media favors supporting the issue (=democrat-oriented)
+  set total_media_valence (blue-media - red-media)
+  set total_media (blue-media + red-media)
 
 end
 
@@ -145,8 +152,8 @@ ifelse discussant-select-base-on-homophily = true
        [ let neighbor one-of turtles-on neighbors ;; define one of neighboring agents as "neighbor"
          let q random-float 1
          ifelse q < propensity-for-homophily  ;; if random number is less than propensity-for-homophily, create link with that neighbor with similarity of +-0.2 range of propensity-for-homophily
-         [ if (propensity-for-homophily - random-float 0.2) <= (similarity-between neighbor self) and (similarity-between neighbor self) <= (propensity-for-homophily + random-float 0.2) [create-link-with neighbor] ]
-         [ create-link-with neighbor] ;; if greater, creat link at random basis
+         [ if ((propensity-for-homophily - 0.2) <= (similarity-between neighbor self)) and ((similarity-between neighbor self) <= (propensity-for-homophily + 0.2)) [create-link-with neighbor] ]
+         [ if random-float 1 < 0.5 [create-link-with neighbor]] ;; if greater, creat link at random basis
 
          ;; this results in a situation where
          ;; (a) for greater value of "propensity-for-homophily" (e.g., 0.8), selection of discussants based on homophily is more prevalent while there's still random connections
@@ -178,19 +185,14 @@ to discuss-politics
 ifelse any? my-connected-neighbors  ; for any agent who has at least one connected neighbors,
 [
    ; for mean average, define "total" as the mean opinion distribution of one's network (e.g., DeGroot, 1974; Friedkin, 1998)
-   if social-infleunce-model? = "mean-average-model" ;; similar to naive-learning and informational influence idea
+   if social-influence-model = "mean-average-model" ;; similar to naive-learning and informational influence idea
    [ set total_social mean [attitudes] of my-connected-neighbors ]
 
 
    ; for majority modle, define "total" as the modal value of opinion distribution in one's network (e.g., Axelrod 1997; Watts & Dodds, 2007)
-   if social-infleunce-model? = "majority-model" ;; similar to "threshold model" and normative influence idea
+   if social-influence-model = "majority-model" ;; similar to "threshold model" and normative influence idea
    [ set total_social mean (modes [attitudes] of my-connected-neighbors) ]
 
-
-   if social-infleunce-model? = "bounded-confidence-model" ;; Deffuant–Weisbuch BC model -- similar to social judgement theory (only opinions of those who fall in lattitudes of acceptance counts!)
-   [ let neighbor one-of my-connected-neighbors
-     set inner-bound-of-tolerance turtle-set (my-connected-neighbors with [ abs([attitudes] of neighbor - [attitudes] of self) <= propensity-for-homophily * 6 ])
-     set total_social (mean [attitudes] of inner-bound-of-tolerance) ]
 
    if attitudes > 0 ;; if an agent supports the position (== Democrats)
    [ set disagree (count my-connected-neighbors with [ attitudes < 0 ]) / count my-connected-neighbors ]
@@ -198,68 +200,143 @@ ifelse any? my-connected-neighbors  ; for any agent who has at least one connect
    [ set disagree (count my-connected-neighbors with [ attitudes > 0 ]) / count my-connected-neighbors ]
    if attitudes = 0 ;; for neutral
    [ set disagree (count my-connected-neighbors with [ attitudes != 0 ]) / count my-connected-neighbors ]
+
+   set total count my-connected-neighbors
+   set rep (count my-connected-neighbors with [ attitudes < 0 ]) / count my-connected-neighbors
+   set ind (count my-connected-neighbors with [ attitudes = 0 ]) / count my-connected-neighbors
+   set dem (count my-connected-neighbors with [ attitudes > 0 ]) / count my-connected-neighbors
+   set diversity (1 - (rep * rep) - (ind * ind) - (dem * dem))
 ]
 
 [ ;; if there's no connected neighbors
   set total_social 0
-  set disagree 0 ]
+  set disagree 0
+  set diversity 0 ]
 
 end
 
 
 
 
-to update-opinion  ;; need to work on this logic !!!!!!!!!!!!!!
+to update-opinion  ;;
 
-if opinion-update-model? = "weighted-mean-average"
-
-[ set prior-attitudes attitudes
+  set prior-attitudes attitudes ;; copy the value of current attitudes before updating
   let SINP social-influence-parameter
   let MINP media-influence-parameter
-  let STBP stability-parameter
-  let random-variation-prior-attitudes random-float (1 - STBP) ;; prior attitudes randomly "decay" or  "attenuate" (to the opposite direction)
 
-  set prior-attitudes prior-attitudes * random-variation-prior-attitudes  ;; if republican, a value of attitude increases. if democrat, a value of prior attitude decreases.
+  let STBP (1 - random-decay-parameter) ; random-decay-parameter defines the baseline attitude stability (i.e., random decay value)
 
-  ifelse any? my-connected-neighbors
-  [ set tally (prior-attitudes + SINP * total_social + MINP * total_media) ]
-  [ set tally (prior-attitudes + MINP * total_media) ] ;; for those who have no connected neighbors, social influence is not considered..
+  if any? my-connected-neighbors  ; for those who have social network influence, decay value increases (low attitude certainty)
+  [ set agree 1 - disagree
+    let qq (agree - disagree) / count my-connected-neighbors
+    let decay_multiplier (1 + e ^ (- qq)) / 2
+    set STBP (STBP * decay_multiplier)
 
-  if tally > prior-attitudes [set attitudes attitudes + 1]
-  if tally < prior-attitudes [set attitudes attitudes - 1]
+    let media_multiplier 2 / (1 + e ^ (- qq))
+    set MINP (MINP * media_multiplier)
+
+    ;;let social_multiplier 2 / (1 + e ^ (- qq))
+    ;; set SINP (SINP * social_multiplier)
+
+    ]
+
+  let prior-attitudes-for-tally attitudes * (1 - STBP)  ;; if republican, a value of attitude increases. if democrat, a value of prior attitude decreases (randomly regresses to neutral point).
 
 
-  if attitudes < -3 [ set attitudes -3 ]
-  if attitudes > 3 [ set attitudes 3 ]
+if opinion-update-model = "WMA-disagree-pro-and-counter-exposure"
 
+[   ifelse any? my-connected-neighbors
+  [ ;; if there's connected neighbors
+
+    if attitudes < 0  ;; for Republicans
+    [ set tally (prior-attitudes-for-tally + (media-influence-parameter ^ 2 / MINP) * blue-media - (MINP * red-media) + SINP * total_social) ]
+
+    if attitudes > 0  ;; for democrats
+    [ set tally (prior-attitudes-for-tally + (MINP * blue-media) - ((media-influence-parameter ^ 2 / MINP) * red-media) + SINP * total_social) ]
+
+    if attitudes = 0 ;; for independents
+    [ set tally (prior-attitudes-for-tally + (media-influence-parameter ^ 2 / MINP) * blue-media - ((media-influence-parameter ^ 2 / MINP) * red-media) + SINP * total_social) ] ]
+
+  [ ;; if there's no connected neighbors
+
+    set tally (prior-attitudes-for-tally + media-influence-parameter * blue-media - media-influence-parameter * red-media) ] ;; for those who have no connected neighbors, social influence is not considered..
+
+  ;; finally, update attitudes
+  ifelse tally < prior-attitudes [set attitudes prior-attitudes - 1]
+  [ifelse tally > prior-attitudes [set attitudes prior-attitudes + 1]
+    [set attitudes prior-attitudes]]
 
  ]
 
-if opinion-update-model? = "current-social-only"
+if opinion-update-model = "WMA-disagree-pro-exposure"
+
+[   ifelse any? my-connected-neighbors
+  [ ;; if there's connected neighbors
+
+    if attitudes < 0  ;; for Republicans
+    [ set tally (prior-attitudes-for-tally + (media-influence-parameter * blue-media - MINP * red-media) + SINP * total_social) ]
+
+    if attitudes > 0  ;; for democrats
+    [ set tally (prior-attitudes-for-tally + (MINP * blue-media - media-influence-parameter * red-media) + SINP * total_social) ]
+
+    if attitudes = 0 ;; for independents
+    [ set tally (prior-attitudes-for-tally + (media-influence-parameter * blue-media - media-influence-parameter * red-media) + SINP * total_social) ] ]
+
+  [ ;; if there's no connected neighbors
+
+    set tally (prior-attitudes-for-tally + media-influence-parameter * blue-media - media-influence-parameter * red-media) ] ;; for those who have no connected neighbors, social influence is not considered..
+
+  ;; finally, update attitudes
+  if tally < prior-attitudes [set attitudes prior-attitudes - 1]
+  if tally > prior-attitudes [set attitudes prior-attitudes + 1]
+
+ ]
+
+if opinion-update-model = "WMA-disagree-counter-exposure"
+
+[   ifelse any? my-connected-neighbors
+  [ ;; if there's connected neighbors
+
+    if attitudes < 0  ;; for Republicans
+    [ set tally (prior-attitudes-for-tally + ((media-influence-parameter ^ 2 / MINP) * blue-media - media-influence-parameter * red-media) + SINP * total_social) ]
+
+    if attitudes > 0  ;; for democrats
+    [ set tally (prior-attitudes-for-tally + (media-influence-parameter * blue-media - (media-influence-parameter ^ 2 / MINP) * red-media) + SINP * total_social) ]
+
+    if attitudes = 0 ;; for independents
+    [ set tally (prior-attitudes-for-tally + ((media-influence-parameter ^ 2 / MINP) * blue-media - (media-influence-parameter ^ 2 / MINP) * red-media) + SINP * total_social) ] ]
+
+  [ ;; if there's no connected neighbors
+
+    set tally (prior-attitudes-for-tally + media-influence-parameter * blue-media - media-influence-parameter * red-media) ] ;; for those who have no connected neighbors, social influence is not considered..
+
+  ;; finally, update attitudes
+  if tally < prior-attitudes [set attitudes prior-attitudes - 1]
+  if tally > prior-attitudes [set attitudes prior-attitudes + 1]
+
+ ]
+
+if opinion-update-model = "weighted-mean-average"
 
 [ ifelse any? my-connected-neighbors
-  [ if total_social > 0.5 [ set attitudes 1 ]  ; if mean is greater than 0.5, support the issue
-      if total_social < 0.5 [ set attitudes 0 ]  ; if mean is less than 0.5, oppose the issue
-      if total_social = 0.5
-        [ if change-attitudes-if-tied?
-          [ set attitudes (1 - attitudes) ] ] ]
-  [ set attitudes attitudes ]
+  [ ;; if there's connected neighbors
 
-]
+    set tally (prior-attitudes-for-tally + (media-influence-parameter * blue-media - media-influence-parameter * red-media) + SINP * total_social) ]
 
-if opinion-update-model? = "social-and-media"
+  [ ;; if there's no connected neighbors
 
-[ set prior-attitudes attitudes
+    set tally (prior-attitudes-for-tally + media-influence-parameter * blue-media - media-influence-parameter * red-media) ]  ;; for those who have no connected neighbors, social influence is not considered..
 
-  ifelse any? my-connected-neighbors
-  [ set tally (total_social + total_media) / 2 ]
-  [ set tally (total_media) ]
+  ;; finally, update attitudes
+  if tally < prior-attitudes [set attitudes prior-attitudes - 1]
+  if tally > prior-attitudes [set attitudes prior-attitudes + 1]
 
-   if tally > 0.5 [ set attitudes 1 ]  ; if mean is greater than 0.5, support the issue
-      if tally < 0.5 [ set attitudes 0 ]  ; if mean is less than 0.5, oppose the issue
-      if tally = 0.5
-        [ if change-attitudes-if-tied?
-          [ set attitudes (1 - attitudes) ] ] ]
+ ]
+
+
+  ;; setting the end-limits of attitude scale
+  if attitudes < -3 [ set attitudes -3 ]
+  if attitudes > 3 [ set attitudes 3 ]
 
 
 end
@@ -280,12 +357,21 @@ to recolor-turtles
 
 end
 
+;; a series of reporter for outcome variables
 
-to recolor-patch  ;; patch procedure
+to-report attitude-towards-extreme
 
-  if attitudes = 0 [ set pcolor black ]
-  if attitudes < 0 [ set pcolor 23 ] ;; if Repulican ("do not support"), color as orange
-  if attitudes > 0 [ set pcolor 103] ;; if Democrats ("support"), color as sky
+  let changed-attitude-towards-extreme 0
+  let attitude-change (attitudes - prior-attitudes)
+
+  if prior-attitudes < 0 ;; Republican at prior-wave
+  [if attitude-change < 0 [ set changed-attitude-towards-extreme 1 ] ]
+
+  if prior-attitudes > 0 ;; Democrats at prior-wave
+  [if attitude-change > 0 [ set changed-attitude-towards-extreme 1 ] ]
+
+  report changed-attitude-towards-extreme
+
 end
 
 @#$#@#$#@
@@ -296,7 +382,7 @@ GRAPHICS-WINDOW
 401
 -1
 -1
-36.0
+14.4
 1
 10
 1
@@ -307,9 +393,9 @@ GRAPHICS-WINDOW
 1
 1
 0
-9
+24
 0
-9
+24
 1
 1
 1
@@ -317,10 +403,10 @@ ticks
 30.0
 
 BUTTON
-20
-140
-115
-195
+22
+141
+117
+196
 setup
 setup
 NIL
@@ -372,17 +458,6 @@ count turtles with\n  [ attitudes < 0 ]
 1
 11
 
-SWITCH
-848
-109
-1033
-142
-change-attitudes-if-tied?
-change-attitudes-if-tied?
-1
-1
--1000
-
 SLIDER
 622
 259
@@ -392,7 +467,7 @@ exposure-to-counter-media
 exposure-to-counter-media
 0
 1
-0.45
+0.5
 0.05
 1
 NIL
@@ -401,21 +476,24 @@ HORIZONTAL
 PLOT
 626
 298
-926
+959
 448
-Exposure to countter-attr media
+Exposure to media
 NIL
 NIL
 0.0
 10.0
 0.0
-1.0
+3.0
 true
-false
+true
 "" ""
 PENS
-"Democrats" 1.0 0 -13345367 true "" "if any? turtles with [ attitudes > 0 ] [plot mean [ red-media ] of turtles with [ attitudes > 0 ]]"
-"Republicans" 1.0 0 -2674135 true "" "if any? turtles with [ attitudes < 0 ] [plot mean [ blue-media ] of turtles with [ attitudes < 0 ]]"
+"Dem_counter" 1.0 0 -8630108 true "" "if any? turtles with [ attitudes > 0 ] [plot mean [ red-media ] of turtles with [ attitudes > 0 ]]"
+"Rep_counter" 1.0 0 -5825686 true "" "if any? turtles with [ attitudes < 0 ] [plot mean [ blue-media ] of turtles with [ attitudes < 0 ]]"
+"total_amount" 1.0 0 -7500403 true "" "plot mean [total_media] of turtles"
+"Dem_pro" 1.0 0 -13791810 true "" "if any? turtles with [ attitudes > 0 ] [plot mean [ blue-media ] of turtles with [ attitudes > 0 ]]"
+"Rep_pro" 1.0 0 -5298144 true "" "if any? turtles with [ attitudes < 0 ] [plot mean [ red-media ] of turtles with [ attitudes < 0 ]]"
 
 INPUTBOX
 21
@@ -423,7 +501,7 @@ INPUTBOX
 93
 128
 world-size-x
-10
+25
 1
 0
 Number
@@ -434,7 +512,7 @@ INPUTBOX
 170
 129
 world-size-y
-10
+25
 1
 0
 Number
@@ -465,7 +543,7 @@ propensity-for-homophily
 propensity-for-homophily
 0
 1
-0.7
+0.5
 0.1
 1
 NIL
@@ -483,10 +561,10 @@ mean [ count my-connected-neighbors ] of turtles
 11
 
 MONITOR
-850
-153
-985
-198
+941
+152
+1048
+197
 mean "on-line tally"
 mean [ tally ] of turtles
 17
@@ -494,30 +572,30 @@ mean [ tally ] of turtles
 11
 
 SLIDER
-1073
-143
-1267
-176
+1054
+135
+1231
+168
 social-influence-parameter
 social-influence-parameter
 0
 1
-1
+0.4
 0.05
 1
 NIL
 HORIZONTAL
 
 SLIDER
-1073
-64
-1271
-97
+1053
+99
+1231
+132
 media-influence-parameter
 media-influence-parameter
 0
 1
-0.7
+0.5
 0.05
 1
 NIL
@@ -528,7 +606,7 @@ PLOT
 404
 1196
 554
-overall network homophily
+network disagreement
 NIL
 NIL
 0.0
@@ -539,7 +617,8 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot mean [ 1 - disagree ] of turtles"
+"at-least-one-disagree" 1.0 0 -16777216 true "" "if any? turtles with [ disagree > 0 ] [plot mean [ disagree ] of turtles with [ disagree > 0 ]]"
+"overall" 1.0 0 -7500403 true "" "plot mean [ disagree ] of turtles"
 
 MONITOR
 659
@@ -563,14 +642,14 @@ true false
 0
 
 CHOOSER
-849
-56
-1031
-101
-opinion-update-model?
-opinion-update-model?
-"current-social-only" "social-and-media" "weighted-mean-average"
-2
+878
+98
+1049
+143
+opinion-update-model
+opinion-update-model
+"weighted-mean-average" "WMA-disagree-pro-exposure" "WMA-disagree-counter-exposure" "WMA-disagree-pro-and-counter-exposure"
+3
 
 MONITOR
 661
@@ -584,15 +663,15 @@ mean [ total_media ] of turtles
 11
 
 SLIDER
-1073
-104
-1245
-137
-stability-parameter
-stability-parameter
+1054
+171
+1250
+204
+random-decay-parameter
+random-decay-parameter
 0
 1
-0.7
+0.2
 0.05
 1
 NIL
@@ -631,20 +710,20 @@ Media Exposure\n
 1
 
 TEXTBOX
-1043
-222
-1193
-240
+1167
+224
+1317
+242
 Political discussion
 14
 0.0
 1
 
 TEXTBOX
-883
-22
-1033
-40
+1005
+70
+1155
+88
 Opinion dynamics
 14
 0.0
@@ -670,24 +749,6 @@ mean [attitudes] of turtles
 17
 1
 11
-
-PLOT
-230
-423
-430
-573
-total media exposure
-NIL
-NIL
--3.0
-3.0
-0.0
-100.0
-false
-false
-"set-plot-x-range -4 4\nset-plot-y-range 0 count turtles\nset-histogram-num-bars 7" ""
-PENS
-"default" 1.0 1 -16777216 true "" "histogram [total_media] of turtles"
 
 SLIDER
 805
@@ -720,20 +781,10 @@ CHOOSER
 251
 1428
 296
-social-infleunce-model?
-social-infleunce-model?
-"mean-average-model" "majority-model" "bounded-confidence-model"
+social-influence-model
+social-influence-model
+"mean-average-model" "majority-model"
 0
-
-TEXTBOX
-1445
-260
-1721
-316
-** for bounded confidence model, \"tolerance\" is equal to \"propensity-for-homophily\" parameter value (scaled to -3 to 3 range)
-11
-0.0
-1
 
 MONITOR
 1233
@@ -742,6 +793,99 @@ MONITOR
 349
 mean "social influence"
 mean [total_social] of turtles
+17
+1
+11
+
+MONITOR
+1150
+584
+1316
+629
+mean disagreement, overall
+mean [ disagree ] of turtles
+17
+1
+11
+
+MONITOR
+1208
+501
+1408
+546
+NIL
+count turtles with [ disagree > 0 ]
+17
+1
+11
+
+PLOT
+229
+584
+429
+734
+attitudes distribution
+NIL
+NIL
+-3.0
+3.0
+0.0
+200.0
+true
+false
+"set-plot-x-range -4 4\nset-plot-y-range 0 count turtles\nset-histogram-num-bars 7" ""
+PENS
+"default" 2.0 1 -16777216 true "" "histogram [attitudes] of turtles"
+
+PLOT
+435
+585
+635
+735
+Mean attitudes over time
+NIL
+NIL
+0.0
+10.0
+-4.0
+4.0
+true
+false
+"" ""
+PENS
+"Dem" 1.0 0 -14454117 true "" "if any? turtles with [ attitudes > 0 ] [plot mean [attitudes] of turtles with [attitudes > 0]]"
+"Rep" 1.0 0 -5298144 true "" "if any? turtles with [ attitudes < 0 ] [plot mean [attitudes] of turtles with [attitudes < 0]]"
+"overall" 1.0 0 -7500403 true "" "plot mean [attitudes] of turtles"
+
+MONITOR
+1151
+632
+1395
+677
+NIL
+mean [diversity] of turtles
+2
+1
+11
+
+MONITOR
+225
+741
+428
+786
+Prob. [ attitude-towards-extreme = 1 ]
+count turtles with [ attitude-towards-extreme = 1 ] / count turtles
+17
+1
+11
+
+MONITOR
+225
+790
+428
+835
+Prob. [ attitude-towards-extreme = 0 ]
+count turtles with [ attitude-towards-extreme = 0 ] / count turtles
 17
 1
 11
