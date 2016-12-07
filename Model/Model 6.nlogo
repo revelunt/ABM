@@ -12,7 +12,7 @@ patches-own  ;; each patches provides media exposure
 ]
 
 turtles-own
-[ preference-for-politics  ;; interest and the level of engagement with politics
+[ political-interest  ;; interest and the level of engagement with politics
   attitudes   ;; an attitude of an agent (-3: oppose or +3: support). We defined the "supporting issue" means he or she is a Democrat.
   prior-attitudes  ;; attitudes at prior waves
   total_social  ;; sum of attitudes around me from social networks
@@ -31,7 +31,7 @@ turtles-own
 ]
 
 to setup
-  random-seed custom-random-seed
+  random-seed custom-random-seed ;; accepts input from RNetlogo command
   clear-all
   clear-all-plots
 
@@ -42,19 +42,17 @@ to setup
   setup-turtles                                          ;; creating the agents, locating them and setting their attitudes values randomly
 
   ask turtles
-    [ if preference-for-politics < 0.3  ;; low-end of preference-for-politics
+    [ if political-interest < 0.3  ;; low-end of preference-for-politics (i.e., political interest)
       [ set attitudes -1 + random 3 ]
-      if preference-for-politics >= 0.3 and preference-for-politics < 0.7  ;; middle of preference-for-politics
+      if political-interest >= 0.3 and political-interest < 0.7  ;; middle of preference-for-politics (i.e., political interest)
       [ ifelse random-float 1 < 0.5
         [ set attitudes -2 + random 3 ]
         [ set attitudes 0 + random 3 ]]
-      if preference-for-politics >= 0.7 ;; high-end of preference-for-politics
+      if political-interest >= 0.7 ;; high-end of preference-for-politics (i.e., political interest)
       [ ifelse random-float 1 < 0.5
         [ set attitudes -3 + random 2 ]
         [ set attitudes 2 + random 2 ]]
 
-      ;; old procedures
-      ;; set attitudes -3 + random 7 ; randomly return a range of values from -3 to +3
       recolor-turtles ]
 
   reset-ticks
@@ -67,7 +65,7 @@ to setup-turtles
   create-turtles number_of_agents [
     set size 0.8
     while [any? other turtles-here] [ move-to one-of patches ] ;; setting agent location. Only one agent at each patch
-    set preference-for-politics random-normal-in-bounds 0.5 0.2 0 1
+    set political-interest random-normal-in-bounds 0.5 0.2 0 1
   ]
 
 end
@@ -109,25 +107,25 @@ to go
 
   ]
 
-  if model-preference-for-politics = "Yes" ;; see "Media and polarization" by Prior (2007; 2013), especially polarization without persuasion part.
+  if model-dropout-based-on-preference-for-politics = "Yes" ;; see "Media and polarization" by Prior (2007; 2013), especially polarization without persuasion part.
   ;; what if moderates are dropping out from engaging with partisan media?
   ;; what if availability of partisan media sources vary geographically?
   [
     ask turtles
-    [ if preference-for-politics < 0.3 and attitudes = 0 and random-float 1 < 0.2 [ die ]
+    [ if political-interest < 0.3 and attitudes = 0 and random-float 1 < 0.2 [ die ]
       move ]
 
     if ((ticks > 274 and ticks < 456) or (ticks > 639 and ticks < 821)) and count turtles < number_of_agents
     [ let n-new-turtles (number_of_agents - count turtles) / 10
       ask n-of random n-new-turtles patches with [not any? turtles-here] [ sprout 1 [
-          set preference-for-politics random-normal-in-bounds 0.3 0.1 0 0.5
-          if preference-for-politics < 0.3  ;; low-end of preference-for-politics
+          set political-interest random-normal-in-bounds 0.3 0.1 0 0.5
+          if political-interest < 0.3  ;; low-end of political-interest
           [ set attitudes -1 + random 3 ]
-          if preference-for-politics >= 0.3 and preference-for-politics < 0.7  ;; middle of preference-for-politics
+          if political-interest >= 0.3 and political-interest < 0.7  ;; middle of political-interest
           [ ifelse random-float 1 < 0.5
             [ set attitudes -2 + random 3 ]
             [ set attitudes 0 + random 3 ]]
-          if preference-for-politics >= 0.7 ;; high-end of preference-for-politics
+          if political-interest >= 0.7 ;; high-end of political-interest
           [ ifelse random-float 1 < 0.5
             [ set attitudes -3 + random 2 ]
             [ set attitudes 2 + random 2 ]]
@@ -164,7 +162,7 @@ to watch-media  ;; how "selective" exposure map into this submodel? (direct expo
 
 
     if (media-interest-interaction = "Yes") ;; discount the degree of selective exposure by the lack of political interest
-    [set red-media (red-media * preference-for-politics)]
+    [set red-media (red-media * political-interest)]
 
     if exposure-to-pro-media < 1  ;; (global) if exposure-to-pro-media parameter is less than 1, do following...
 
@@ -185,8 +183,8 @@ to watch-media  ;; how "selective" exposure map into this submodel? (direct expo
         set blue-media random (4 * exposure-to-pro-media) ]  ;; randomly get blue and red media exposure, to varying (random) degree from 0 to 3
 
        if (media-interest-interaction = "Yes") ;; discount the degree of selective exposure by the lack of political interest
-       [ set red-media red-media * preference-for-politics
-         set blue-media blue-media * preference-for-politics ]
+       [ set red-media red-media * political-interest
+         set blue-media blue-media * political-interest ]
 
      ;; (global) if exposure-to-pro-media parameter is less than 1, above formula also takes care of the discounting factor
 
@@ -198,7 +196,7 @@ to watch-media  ;; how "selective" exposure map into this submodel? (direct expo
     if attitudes > random 4 [ set blue-media blue-media + 1 ]  ;; attitudes (1,2,3) > (0,1,2,3)?? --> all randomly get blue media exposure
 
     if (media-interest-interaction = "Yes") ;; discount the degree of selective exposure by the lack of political interest
-    [ set blue-media blue-media * preference-for-politics ]
+    [ set blue-media blue-media * political-interest ]
 
     if exposure-to-pro-media < 1  ;; (global) if exposure-to-pro-media parameter is less than 1, do following...
       [ set blue-media (blue-media * exposure-to-pro-media) ]
@@ -225,9 +223,9 @@ to watch-media  ;; how "selective" exposure map into this submodel? (direct expo
   if (selective-avoidance = "Yes") ;; whether strong partisans (i.e., those who have higher political interest) actively avoid counter-attitudinal information?
 
   [if attitudes < 0 ;; if republicans
-    [ set blue-media blue-media * (1 - preference-for-politics) ]
+    [ set blue-media blue-media * (1 - political-interest) ]
    if attitudes > 0 ;; if democrats
-    [ set red-media red-media * (1 - preference-for-politics) ] ]
+    [ set red-media red-media * (1 - political-interest) ] ]
 
 
   ;; how much of "support-side" considerations from media exposure? any value greater than zero means media favors supporting the issue (=democrat-oriented)
@@ -376,12 +374,12 @@ if opinion-update-model = "WMA-disagree-pro-and-counter-exposure" ;; interperson
 
     if attitudes < 0  ;; for Republicans
     ;; previously, [ set tally (prior-attitudes-for-tally + (media-influence-parameter ^ 2 / MINP) * blue-media - (MINP * red-media) + SINP * total_social) ]
-    [ set tally (prior-attitudes-for-tally + (media-influence-parameter ^ 2 / MINP) * (1 - preference-for-politics) * blue-media - (MINP * red-media) + SINP * total_social) ]
+    [ set tally (prior-attitudes-for-tally + (media-influence-parameter ^ 2 / MINP) * (1 - political-interest) * blue-media - (MINP * red-media) + SINP * total_social) ]
 
 
     if attitudes > 0  ;; for democrats
     ;; previously, [ set tally (prior-attitudes-for-tally + (MINP * blue-media) - ((media-influence-parameter ^ 2 / MINP) * red-media) + SINP * total_social) ]
-    [ set tally (prior-attitudes-for-tally + (MINP * blue-media) - ((media-influence-parameter ^ 2 / MINP) * (1 - preference-for-politics) * red-media) + SINP * total_social) ]
+    [ set tally (prior-attitudes-for-tally + (MINP * blue-media) - ((media-influence-parameter ^ 2 / MINP) * (1 - political-interest) * red-media) + SINP * total_social) ]
 
 
     if attitudes = 0 ;; for independents
@@ -392,10 +390,10 @@ if opinion-update-model = "WMA-disagree-pro-and-counter-exposure" ;; interperson
     ;; previously, set tally (prior-attitudes-for-tally + media-influence-parameter * blue-media - media-influence-parameter * red-media) ] ;; for those who have no connected neighbors, social influence is not considered..
 
     if attitudes < 0  ;; for Republicans
-    [set tally (prior-attitudes-for-tally + media-influence-parameter * (1 - preference-for-politics) * blue-media - media-influence-parameter * red-media) ]
+    [set tally (prior-attitudes-for-tally + media-influence-parameter * (1 - political-interest) * blue-media - media-influence-parameter * red-media) ]
 
     if attitudes > 0  ;; for democrats
-    [set tally (prior-attitudes-for-tally + media-influence-parameter * blue-media - media-influence-parameter * (1 - preference-for-politics) * red-media) ]
+    [set tally (prior-attitudes-for-tally + media-influence-parameter * blue-media - media-influence-parameter * (1 - political-interest) * red-media) ]
 
     if attitudes = 0 ;; for independents
     [set tally (prior-attitudes-for-tally + media-influence-parameter * blue-media - media-influence-parameter * red-media) ]]
@@ -571,9 +569,9 @@ to-report ER.pol.index [variable] ;; variable = attitudes
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-230
+174
 10
-600
+544
 401
 -1
 -1
@@ -598,9 +596,9 @@ ticks
 30.0
 
 BUTTON
-64
+8
 251
-159
+103
 306
 setup
 setup
@@ -615,9 +613,9 @@ NIL
 1
 
 BUTTON
-63
+7
 197
-118
+62
 230
 Run
 go
@@ -632,9 +630,9 @@ NIL
 0
 
 SLIDER
-617
+561
 79
-792
+736
 112
 exposure-to-counter-media
 exposure-to-counter-media
@@ -647,9 +645,9 @@ NIL
 HORIZONTAL
 
 INPUTBOX
-66
+10
 55
-138
+82
 115
 world-size-x
 50
@@ -658,9 +656,9 @@ world-size-x
 Number
 
 INPUTBOX
-145
+89
 56
-215
+159
 116
 world-size-y
 50
@@ -669,9 +667,9 @@ world-size-y
 Number
 
 BUTTON
-127
+71
 197
-210
+154
 230
 Run once
 go
@@ -686,10 +684,10 @@ NIL
 1
 
 SLIDER
-611
-200
-812
-233
+565
+277
+766
+310
 propensity-for-homophily
 propensity-for-homophily
 0
@@ -701,60 +699,60 @@ NIL
 HORIZONTAL
 
 SLIDER
-618
-391
-795
-424
+559
+480
+736
+513
 social-influence-parameter
 social-influence-parameter
 0
 1
-0.4
+0.3
 0.05
 1
 NIL
 HORIZONTAL
 
 SLIDER
-617
-355
-795
-388
+558
+444
+736
+477
 media-influence-parameter
 media-influence-parameter
 0
 1
-0.4
+0.3
 0.05
 1
 NIL
 HORIZONTAL
 
 CHOOSER
-611
-150
-811
-195
+565
+227
+765
+272
 discussant-select-base-on-homophily
 discussant-select-base-on-homophily
 true false
 0
 
 CHOOSER
-803
-337
-953
-382
+744
+458
+894
+503
 opinion-update-model
 opinion-update-model
 "weighted-mean-average" "WMA-disagree-pro-and-counter-exposure"
 1
 
 SLIDER
-618
-430
-795
-463
+559
+519
+736
+552
 random-decay-parameter
 random-decay-parameter
 0
@@ -766,9 +764,9 @@ NIL
 HORIZONTAL
 
 TEXTBOX
-646
+590
 15
-752
+696
 38
 Media Exposure\n
 14
@@ -776,29 +774,29 @@ Media Exposure\n
 1
 
 TEXTBOX
-658
-125
-808
-143
+597
+193
+747
+211
 Political discussion
 14
 0.0
 1
 
 TEXTBOX
-723
-307
-873
-325
+664
+396
+814
+414
 Opinion dynamics
 14
 0.0
 1
 
 TEXTBOX
-132
+76
 18
-282
+226
 36
 Setup
 14
@@ -806,54 +804,54 @@ Setup
 1
 
 SLIDER
-617
+561
 41
-791
+735
 74
 exposure-to-pro-media
 exposure-to-pro-media
 0
 1
-0.5
+1
 0.1
 1
 NIL
 HORIZONTAL
 
 CHOOSER
-613
-242
-814
-287
+567
+319
+768
+364
 social-influence-model
 social-influence-model
 "mean-average-model" "majority-model"
 0
 
 CHOOSER
-803
-386
-953
-431
+744
+507
+894
+552
 model-election-cycle
 model-election-cycle
 "Yes" "No"
-1
+0
 
 CHOOSER
-803
-433
-953
-478
-model-preference-for-politics
-model-preference-for-politics
+560
+566
+849
+611
+model-dropout-based-on-preference-for-politics
+model-dropout-based-on-preference-for-politics
 "Yes" "No"
-1
+0
 
 INPUTBOX
-65
+9
 119
-216
+160
 179
 custom-random-seed
 55555
@@ -862,9 +860,9 @@ custom-random-seed
 Number
 
 SWITCH
-798
+742
 40
-987
+931
 73
 indirect-exposure
 indirect-exposure
@@ -873,9 +871,9 @@ indirect-exposure
 -1000
 
 SWITCH
-798
+742
 79
-985
+929
 112
 media-interest-interaction
 media-interest-interaction
@@ -884,21 +882,21 @@ media-interest-interaction
 -1000
 
 SWITCH
-993
-40
-1158
-73
+743
+118
+908
+151
 selective-avoidance
 selective-avoidance
-1
+0
 1
 -1000
 
 TEXTBOX
-996
-99
-1146
-155
+948
+78
+1098
+134
 \"media-interest-interaction\": those with higher interest would be more likely to be selective in media use?
 11
 0.0
@@ -907,43 +905,39 @@ TEXTBOX
 @#$#@#$#@
 ## WHAT IS IT?
 
-This model is a simple cellular automaton that simulates voting distribution by having each patch take a "vote" of its eight surrounding neighbors, then perhaps change its own vote according to the outcome.
+This model is a simple automaton that simulates opinion distribution by having each individuals (tuttles) take a "partisan media exposure" of its residing patches, "discuss" politics with maximum of eight surrounding neighbors, then change its own attitudes according to the exposure.
 
 ## HOW TO USE IT
 
-Click the SETUP button to create an approximately equal but random distribution of blue and green patches.  Click GO to run the simulation.
+Click the SETUP button to create an approximately equal but random distribution of blue, white, and red tuttles (representing individuals).  Click RUN to run the simulation.
 
-When both switches are off, the central patch changes its color to match the majority vote, but if there is a 4-4 tie, then it does not change.
+## MEDIA EXPOSURE
 
-If the CHANGE-VOTE-IF-TIED? switch is on, then in the case of a tie, the central patch will always change its vote.
+If the INDIRECT-EXPOSURE switch is on, then discussion partners' partisan media exposure also affects one's opinion.
 
-If the AWARD-CLOSE-CALLS-TO-LOSER? switch is on, then if the result is 5-3, the central patch votes with the losing side instead of the winning side.
+If the MEDIA-INTEREST-INTERACTION switch is on, then those who have higher political interest (randomly assigned from 0 to 1 at the beginning of the simulation) are more likely to selectively approach to pro-attitudinal media exposure.
 
-## THINGS TO NOTICE
+If the SELECTIVE-AVOIDANCE switch is on, then those who have higher political interest are more likely to avoid counter-atttitudinal media exposure.
 
-Watch how any setup quickly settles to a static state when both switches are off.
+## POLITICAL DISCUSSION
 
-Watch what happens when only the CHANGE-VOTE-IF-TIED? switch is on.  How is the result different?
+If the DISCUSSANT-SELECT-BASED-ON-HOMOPHILY swith is set to "true", then agents are more likely to create discussion ties with whom they share similar political attitudes (+-1 range of one's own attitudes).
 
-Watch what happens when only the AWARD-CLOSE-CALLS-TO-LOSER? switch is on.  How is the result different?
+If the SOCIAL-INFLUENCE-MODEL switch is set to "mean-average-model", then the influence from one's discussion network is defined as the mean attitudes of one's connected neighbors. If this is set to "majority-model", then the influence from one's discussion network is defined as the modal value of attitudes of one's connected neighbors.
 
-What happens when both switches are on?
+## OPINION DYNAMICS
 
-## EXTENDING THE MODEL
+If the OPINION-UPDATE-MODEL switch is set to "(simple) weighted-mean-average", then the running tally (valence tally from media exposure and political discussion) does not affected by the proportional difference between agreeable and disagreeable neighbors.
 
-Try other voting rules.
+If this is set to "WMA-disagree-pro-and-counter-exposure", then the running tally is additionally weighted by the proportional difference as described in the equation (2) and (3) of the manuscript.
 
-Start with a nonrandom green-and-blue pattern. For example, one could make half of the world blue and half green.
+If the MODEL-ELECTION-CYCLE swith is set to "Yes", then (a) exposure-to-counter-media, (b) propensity-for-homophily, (c) media-influence-paramter, (d) social-influence-parameter, and (e) random-decay-parameter are changed through the election cycles as described in the Table 1 of the manuscript.
 
-Can you enhance the model to incorporate multiple colors and multiple votes?  One might interpret shades of color to represent the degree of a patch's opinion about an issue: strongly against, against, neutral, etc.  Each patch could have more than two choices and weighted votes: blue patches' vote could count twice, etc.
-
-## RELATED MODELS
-
-Ising (a physics model, but the rules are very similar)
+If the MODEL-DROPOUT-BASED-ON-PREFERENCE-FOR-POLITICS swith is set to "Yes", then those who are politically disinterested (less than 0.3 based on 0 - 1 scale) are randomly drop out of the system, and new agents are comming in to the system.
 
 ## CREDITS AND REFERENCES
 
-This model is described in Rudy Rucker's "Artificial Life Lab", published in 1993 by Waite Group Press.
+This model is the extension and adaptation from Wilensky's (1998) voting model described in http://ccl.northwestern.edu/netlogo/models/Voting.
 
 ## HOW TO CITE
 
@@ -951,27 +945,19 @@ If you mention this model or the NetLogo software in a publication, we ask that 
 
 For the model itself:
 
-* Wilensky, U. (1998).  NetLogo Voting model.  http://ccl.northwestern.edu/netlogo/models/Voting.  Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
+NA
 
 Please cite the NetLogo software as:
 
-* Wilensky, U. (1999). NetLogo. http://ccl.northwestern.edu/netlogo/. Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
+NA
 
 ## COPYRIGHT AND LICENSE
-
-Copyright 1998 Uri Wilensky.
 
 ![CC BY-NC-SA 3.0](http://ccl.northwestern.edu/images/creativecommons/byncsa.png)
 
 This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 License.  To view a copy of this license, visit https://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to Creative Commons, 559 Nathan Abbott Way, Stanford, California 94305, USA.
 
-Commercial licenses are also available. To inquire about commercial licenses, please contact Uri Wilensky at uri@northwestern.edu.
 
-This model was created as part of the project: CONNECTED MATHEMATICS: MAKING SENSE OF COMPLEX PHENOMENA THROUGH BUILDING OBJECT-BASED PARALLEL MODELS (OBPML).  The project gratefully acknowledges the support of the National Science Foundation (Applications of Advanced Technologies Program) -- grant numbers RED #9552950 and REC #9632612.
-
-This model was converted to NetLogo as part of the projects: PARTICIPATORY SIMULATIONS: NETWORK-BASED DESIGN FOR SYSTEMS LEARNING IN CLASSROOMS and/or INTEGRATED SIMULATION AND MODELING ENVIRONMENT. The project gratefully acknowledges the support of the National Science Foundation (REPP & ROLE programs) -- grant numbers REC #9814682 and REC-0126227. Converted from StarLogoT to NetLogo, 2001.
-
-<!-- 1998 2001 -->
 @#$#@#$#@
 default
 true
