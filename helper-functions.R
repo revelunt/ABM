@@ -462,7 +462,7 @@ sim_model4_indirect_exposure <- function(custom.seed) {
   NLCommand("set social-influence-parameter 0.4")
   NLCommand("set random-decay-parameter 0.20")
   
-  NLCommand("set indirect-exposure \"On\"")
+  NLCommand("set indirect-exposure TRUE")
   NLCommand("set opinion-update-model \"WMA-disagree-pro-and-counter-exposure\"")
   NLCommand("set model-election-cycle \"Yes\"")
   NLCommand("set model-dropout-based-on-preference-for-politics \"No\"")
@@ -498,7 +498,7 @@ sim_model6_indirect_exposure <- function(custom.seed) {
   NLCommand("set social-influence-parameter 0.4")
   NLCommand("set random-decay-parameter 0.20")
   
-  NLCommand("set indirect-exposure \"On\"")
+  NLCommand("set indirect-exposure TRUE")
   NLCommand("set opinion-update-model \"WMA-disagree-pro-and-counter-exposure\"")
   NLCommand("set model-election-cycle \"Yes\"")
   NLCommand("set model-dropout-based-on-preference-for-politics \"Yes\"")
@@ -515,7 +515,7 @@ sim_model6_indirect_exposure <- function(custom.seed) {
   
 }
 
-sim_model4_europian_cases <- function(custom.seed) {
+sim_model4_european_cases <- function(custom.seed) {
   
   ## set the size of a world
   NLCommand("set world-size-x 50 set world-size-y 50")
@@ -534,7 +534,7 @@ sim_model4_europian_cases <- function(custom.seed) {
   NLCommand("set social-influence-parameter 0.4")
   NLCommand("set random-decay-parameter 0.20")
   
-  NLCommand("set indirect-exposure \"Off\"")
+  NLCommand("set indirect-exposure FALSE")
   NLCommand("set opinion-update-model \"WMA-disagree-pro-and-counter-exposure\"")
   NLCommand("set model-election-cycle \"Yes\"")
   NLCommand("set model-dropout-based-on-preference-for-politics \"No\"")
@@ -551,7 +551,7 @@ sim_model4_europian_cases <- function(custom.seed) {
   
 }
 
-sim_model6_europian_cases <- function(custom.seed) {
+sim_model6_european_cases <- function(custom.seed) {
   
   ## set the size of a world
   NLCommand("set world-size-x 50 set world-size-y 50")
@@ -570,7 +570,7 @@ sim_model6_europian_cases <- function(custom.seed) {
   NLCommand("set social-influence-parameter 0.4")
   NLCommand("set random-decay-parameter 0.20")
   
-  NLCommand("set indirect-exposure \"Off\"")
+  NLCommand("set indirect-exposure FALSE")
   NLCommand("set opinion-update-model \"WMA-disagree-pro-and-counter-exposure\"")
   NLCommand("set model-election-cycle \"Yes\"")
   NLCommand("set model-dropout-based-on-preference-for-politics \"Yes\"")
@@ -606,9 +606,9 @@ sim_model4_pro_interest_interaction_and_avoidance <- function(custom.seed) {
   NLCommand("set social-influence-parameter 0.4")
   NLCommand("set random-decay-parameter 0.20")
   
-  NLCommand("set indirect-exposure \"Off\"")
-  NLCommand("set media-interest-interaction \"On\"")
-  NLCommand("set selective-avoidance \"On\"")
+  NLCommand("set indirect-exposure FALSE")
+  NLCommand("set media-interest-interaction TRUE")
+  NLCommand("set selective-avoidance TRUE")
   NLCommand("set opinion-update-model \"WMA-disagree-pro-and-counter-exposure\"")
   NLCommand("set model-election-cycle \"Yes\"")
   NLCommand("set model-dropout-based-on-preference-for-politics \"No\"")
@@ -644,9 +644,9 @@ sim_model6_pro_interest_interaction_and_avoidance <- function(custom.seed) {
   NLCommand("set social-influence-parameter 0.4")
   NLCommand("set random-decay-parameter 0.20")
   
-  NLCommand("set indirect-exposure \"Off\"")
-  NLCommand("set media-interest-interaction \"On\"")
-  NLCommand("set selective-avoidance \"On\"")
+  NLCommand("set indirect-exposure FALSE")
+  NLCommand("set media-interest-interaction TRUE")
+  NLCommand("set selective-avoidance TRUE")
   NLCommand("set opinion-update-model \"WMA-disagree-pro-and-counter-exposure\"")
   NLCommand("set model-election-cycle \"Yes\"")
   NLCommand("set model-dropout-based-on-preference-for-politics \"Yes\"")
