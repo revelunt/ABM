@@ -367,6 +367,302 @@ sim_model6 <- function(custom.seed) {
   return(attr.dist)
 }
 
+sim_model4_strong_attitudes <- function(custom.seed) { 
+  ## this model is to examine the influence of strong attitudes (e.g., ideology)
+  ## compared to the previous cases, media influnece / social influence are less strong (0.4 -> 0.2)
+  ## and the stability (i.e., random decay) is improved (0.2 -> 0.1)
+  
+  ## set the size of a world
+  NLCommand("set world-size-x 50 set world-size-y 50")
+  
+  ## set media exposure variable
+  NLCommand("set exposure-to-pro-media 1 set exposure-to-counter-media 0.4")
+  
+  ## set political discussion variables
+  ## cf. workgin with quotation marks for command line requires escape character (\" \")
+  NLCommand("set discussant-select-base-on-homophily true")
+  NLCommand("set social-influence-model \"mean-average-model\"")
+  NLCommand("set propensity-for-homophily 0.4")
+  
+  ## set opinion dynamics model parameter ## this is initial condition. 
+  NLCommand("set media-influence-parameter 0.2")
+  NLCommand("set social-influence-parameter 0.2")
+  NLCommand("set random-decay-parameter 0.1")
+  
+  NLCommand("set opinion-update-model \"WMA-disagree-pro-and-counter-exposure\"")
+  NLCommand("set model-election-cycle \"Yes\"")
+  NLCommand("set model-dropout-based-on-preference-for-politics \"No\"")
+  NLCommand(paste0("set custom-random-seed ",custom.seed))
+  
+  ## create a world
+  NLCommand("setup")
+  
+  ## set reporter
+  attr.dist <- NLDoReport(timestep, "go", c("variance [attitudes] of turtles","kurtosis [attitudes] of turtles","ER.pol.index [attitudes] of turtles"))
+  
+  ##return the result
+  return(attr.dist)
+  
+}
+
+sim_model6_strong_attitudes <- function(custom.seed) { 
+  ## this model is to examine the influence of strong attitudes (e.g., ideology)
+  ## compared to the previous cases, media influnece / social influence are less strong (0.4 -> 0.2)
+  ## and the stability (i.e., random decay) is improved (0.2 -> 0.1)
+  
+  ## set the size of a world
+  NLCommand("set world-size-x 50 set world-size-y 50")
+  
+  ## set media exposure variable
+  NLCommand("set exposure-to-pro-media 1 set exposure-to-counter-media 0.4")
+  
+  ## set political discussion variables
+  ## cf. workgin with quotation marks for command line requires escape character (\" \")
+  NLCommand("set discussant-select-base-on-homophily true")
+  NLCommand("set social-influence-model \"mean-average-model\"")
+  NLCommand("set propensity-for-homophily 0.4")
+  
+  ## set opinion dynamics model parameter ## this is initial condition. 
+  NLCommand("set media-influence-parameter 0.2")
+  NLCommand("set social-influence-parameter 0.2")
+  NLCommand("set random-decay-parameter 0.1")
+  
+  NLCommand("set opinion-update-model \"WMA-disagree-pro-and-counter-exposure\"")
+  NLCommand("set model-election-cycle \"Yes\"")
+  NLCommand("set model-dropout-based-on-preference-for-politics \"Yes\"")
+  NLCommand(paste0("set custom-random-seed ",custom.seed))
+  
+  ## create a world
+  NLCommand("setup")
+  
+  ## set reporter
+  attr.dist <- NLDoReport(timestep, "go", c("variance [attitudes] of turtles","kurtosis [attitudes] of turtles","ER.pol.index [attitudes] of turtles"))
+  
+  ##return the result
+  return(attr.dist)
+  
+}
+
+sim_model4_indirect_exposure <- function(custom.seed) {
+  
+  ## set the size of a world
+  NLCommand("set world-size-x 50 set world-size-y 50")
+  
+  ## set media exposure variable
+  NLCommand("set exposure-to-pro-media 1 set exposure-to-counter-media 0.4")
+  
+  ## set political discussion variables
+  ## cf. workgin with quotation marks for command line requires escape character (\" \")
+  NLCommand("set discussant-select-base-on-homophily true")
+  NLCommand("set social-influence-model \"mean-average-model\"")
+  NLCommand("set propensity-for-homophily 0.4")
+  
+  ## set opinion dynamics model parameter
+  NLCommand("set media-influence-parameter 0.4")
+  NLCommand("set social-influence-parameter 0.4")
+  NLCommand("set random-decay-parameter 0.20")
+  
+  NLCommand("set indirect-exposure \"On\"")
+  NLCommand("set opinion-update-model \"WMA-disagree-pro-and-counter-exposure\"")
+  NLCommand("set model-election-cycle \"Yes\"")
+  NLCommand("set model-dropout-based-on-preference-for-politics \"No\"")
+  NLCommand(paste0("set custom-random-seed ",custom.seed))
+  
+  ## create a world
+  NLCommand("setup")
+  
+  ## set reporter
+  attr.dist <- NLDoReport(timestep, "go", c("variance [attitudes] of turtles","kurtosis [attitudes] of turtles","ER.pol.index [attitudes] of turtles"))
+  
+  ##return the result
+  return(attr.dist)
+  
+}
+
+sim_model6_indirect_exposure <- function(custom.seed) {
+  
+  ## set the size of a world
+  NLCommand("set world-size-x 50 set world-size-y 50")
+  
+  ## set media exposure variable
+  NLCommand("set exposure-to-pro-media 1 set exposure-to-counter-media 0.4")
+  
+  ## set political discussion variables
+  ## cf. workgin with quotation marks for command line requires escape character (\" \")
+  NLCommand("set discussant-select-base-on-homophily true")
+  NLCommand("set social-influence-model \"mean-average-model\"")
+  NLCommand("set propensity-for-homophily 0.4")
+  
+  ## set opinion dynamics model parameter
+  NLCommand("set media-influence-parameter 0.4")
+  NLCommand("set social-influence-parameter 0.4")
+  NLCommand("set random-decay-parameter 0.20")
+  
+  NLCommand("set indirect-exposure \"On\"")
+  NLCommand("set opinion-update-model \"WMA-disagree-pro-and-counter-exposure\"")
+  NLCommand("set model-election-cycle \"Yes\"")
+  NLCommand("set model-dropout-based-on-preference-for-politics \"Yes\"")
+  NLCommand(paste0("set custom-random-seed ",custom.seed))
+  
+  ## create a world
+  NLCommand("setup")
+  
+  ## set reporter
+  attr.dist <- NLDoReport(timestep, "go", c("variance [attitudes] of turtles","kurtosis [attitudes] of turtles","ER.pol.index [attitudes] of turtles"))
+  
+  ##return the result
+  return(attr.dist)
+  
+}
+
+sim_model4_europian_cases <- function(custom.seed) {
+  
+  ## set the size of a world
+  NLCommand("set world-size-x 50 set world-size-y 50")
+  
+  ## set media exposure variable
+  NLCommand("set exposure-to-pro-media 0.5 set exposure-to-counter-media 0.4")
+  
+  ## set political discussion variables
+  ## cf. workgin with quotation marks for command line requires escape character (\" \")
+  NLCommand("set discussant-select-base-on-homophily true")
+  NLCommand("set social-influence-model \"mean-average-model\"")
+  NLCommand("set propensity-for-homophily 0.4")
+  
+  ## set opinion dynamics model parameter
+  NLCommand("set media-influence-parameter 0.4")
+  NLCommand("set social-influence-parameter 0.4")
+  NLCommand("set random-decay-parameter 0.20")
+  
+  NLCommand("set indirect-exposure \"Off\"")
+  NLCommand("set opinion-update-model \"WMA-disagree-pro-and-counter-exposure\"")
+  NLCommand("set model-election-cycle \"Yes\"")
+  NLCommand("set model-dropout-based-on-preference-for-politics \"No\"")
+  NLCommand(paste0("set custom-random-seed ",custom.seed))
+  
+  ## create a world
+  NLCommand("setup")
+  
+  ## set reporter
+  attr.dist <- NLDoReport(timestep, "go", c("variance [attitudes] of turtles","kurtosis [attitudes] of turtles","ER.pol.index [attitudes] of turtles"))
+  
+  ##return the result
+  return(attr.dist)
+  
+}
+
+sim_model6_europian_cases <- function(custom.seed) {
+  
+  ## set the size of a world
+  NLCommand("set world-size-x 50 set world-size-y 50")
+  
+  ## set media exposure variable
+  NLCommand("set exposure-to-pro-media 0.5 set exposure-to-counter-media 0.4")
+  
+  ## set political discussion variables
+  ## cf. workgin with quotation marks for command line requires escape character (\" \")
+  NLCommand("set discussant-select-base-on-homophily true")
+  NLCommand("set social-influence-model \"mean-average-model\"")
+  NLCommand("set propensity-for-homophily 0.4")
+  
+  ## set opinion dynamics model parameter
+  NLCommand("set media-influence-parameter 0.4")
+  NLCommand("set social-influence-parameter 0.4")
+  NLCommand("set random-decay-parameter 0.20")
+  
+  NLCommand("set indirect-exposure \"Off\"")
+  NLCommand("set opinion-update-model \"WMA-disagree-pro-and-counter-exposure\"")
+  NLCommand("set model-election-cycle \"Yes\"")
+  NLCommand("set model-dropout-based-on-preference-for-politics \"Yes\"")
+  NLCommand(paste0("set custom-random-seed ",custom.seed))
+  
+  ## create a world
+  NLCommand("setup")
+  
+  ## set reporter
+  attr.dist <- NLDoReport(timestep, "go", c("variance [attitudes] of turtles","kurtosis [attitudes] of turtles","ER.pol.index [attitudes] of turtles"))
+  
+  ##return the result
+  return(attr.dist)
+  
+}
+
+sim_model4_pro_interest_interaction_and_avoidance <- function(custom.seed) {
+  
+  ## set the size of a world
+  NLCommand("set world-size-x 50 set world-size-y 50")
+  
+  ## set media exposure variable
+  NLCommand("set exposure-to-pro-media 1 set exposure-to-counter-media 0.4")
+  
+  ## set political discussion variables
+  ## cf. workgin with quotation marks for command line requires escape character (\" \")
+  NLCommand("set discussant-select-base-on-homophily true")
+  NLCommand("set social-influence-model \"mean-average-model\"")
+  NLCommand("set propensity-for-homophily 0.4")
+  
+  ## set opinion dynamics model parameter
+  NLCommand("set media-influence-parameter 0.4")
+  NLCommand("set social-influence-parameter 0.4")
+  NLCommand("set random-decay-parameter 0.20")
+  
+  NLCommand("set indirect-exposure \"Off\"")
+  NLCommand("set media-interest-interaction \"On\"")
+  NLCommand("set selective-avoidance \"On\"")
+  NLCommand("set opinion-update-model \"WMA-disagree-pro-and-counter-exposure\"")
+  NLCommand("set model-election-cycle \"Yes\"")
+  NLCommand("set model-dropout-based-on-preference-for-politics \"No\"")
+  NLCommand(paste0("set custom-random-seed ",custom.seed))
+  
+  ## create a world
+  NLCommand("setup")
+  
+  ## set reporter
+  attr.dist <- NLDoReport(timestep, "go", c("variance [attitudes] of turtles","kurtosis [attitudes] of turtles","ER.pol.index [attitudes] of turtles"))
+  
+  ##return the result
+  return(attr.dist)
+  
+}
+
+sim_model6_pro_interest_interaction_and_avoidance <- function(custom.seed) {
+  
+  ## set the size of a world
+  NLCommand("set world-size-x 50 set world-size-y 50")
+  
+  ## set media exposure variable
+  NLCommand("set exposure-to-pro-media 1 set exposure-to-counter-media 0.4")
+  
+  ## set political discussion variables
+  ## cf. workgin with quotation marks for command line requires escape character (\" \")
+  NLCommand("set discussant-select-base-on-homophily true")
+  NLCommand("set social-influence-model \"mean-average-model\"")
+  NLCommand("set propensity-for-homophily 0.4")
+  
+  ## set opinion dynamics model parameter
+  NLCommand("set media-influence-parameter 0.4")
+  NLCommand("set social-influence-parameter 0.4")
+  NLCommand("set random-decay-parameter 0.20")
+  
+  NLCommand("set indirect-exposure \"Off\"")
+  NLCommand("set media-interest-interaction \"On\"")
+  NLCommand("set selective-avoidance \"On\"")
+  NLCommand("set opinion-update-model \"WMA-disagree-pro-and-counter-exposure\"")
+  NLCommand("set model-election-cycle \"Yes\"")
+  NLCommand("set model-dropout-based-on-preference-for-politics \"Yes\"")
+  NLCommand(paste0("set custom-random-seed ",custom.seed))
+  
+  ## create a world
+  NLCommand("setup")
+  
+  ## set reporter
+  attr.dist <- NLDoReport(timestep, "go", c("variance [attitudes] of turtles","kurtosis [attitudes] of turtles","ER.pol.index [attitudes] of turtles"))
+  
+  ##return the result
+  return(attr.dist)
+  
+}
+
 ## the quit function
 postpro <- function(x) {NLQuit()}
 

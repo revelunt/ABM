@@ -859,43 +859,35 @@ Number
 @#$#@#$#@
 ## WHAT IS IT?
 
-This model is a simple cellular automaton that simulates voting distribution by having each patch take a "vote" of its eight surrounding neighbors, then perhaps change its own vote according to the outcome.
+This model is a simple automaton that simulates opinion distribution by having each individuals (tuttles) take a "partisan media exposure" of its residing patches, "discuss" politics with maximum of eight surrounding neighbors, then change its own attitudes according to the exposure.
 
 ## HOW TO USE IT
 
-Click the SETUP button to create an approximately equal but random distribution of blue and green patches.  Click GO to run the simulation.
+Click the SETUP button to create an approximately equal but random distribution of blue, white, and red tuttles (representing individuals).  Click RUN to run the simulation.
 
-When both switches are off, the central patch changes its color to match the majority vote, but if there is a 4-4 tie, then it does not change.
+## MEDIA EXPOSURE
 
-If the CHANGE-VOTE-IF-TIED? switch is on, then in the case of a tie, the central patch will always change its vote.
+NA
 
-If the AWARD-CLOSE-CALLS-TO-LOSER? switch is on, then if the result is 5-3, the central patch votes with the losing side instead of the winning side.
+## POLITICAL DISCUSSION
 
-## THINGS TO NOTICE
+If the DISCUSSANT-SELECT-BASED-ON-HOMOPHILY swith is set to "true", then agents are more likely to create discussion ties with whom they share similar political attitudes (+-1 range of one's own attitudes).
 
-Watch how any setup quickly settles to a static state when both switches are off.
+If the SOCIAL-INFLUENCE-MODEL switch is set to "mean-average-model", then the influence from one's discussion network is defined as the mean attitudes of one's connected neighbors. If this is set to "majority-model", then the influence from one's discussion network is defined as the modal value of attitudes of one's connected neighbors.
 
-Watch what happens when only the CHANGE-VOTE-IF-TIED? switch is on.  How is the result different?
+## OPINION DYNAMICS
 
-Watch what happens when only the AWARD-CLOSE-CALLS-TO-LOSER? switch is on.  How is the result different?
+If the OPINION-UPDATE-MODEL switch is set to "(simple) weighted-mean-average", then the running tally (valence tally from media exposure and political discussion) does not affected by the proportional difference between agreeable and disagreeable neighbors.
 
-What happens when both switches are on?
+If this is set to "WMA-disagree-pro-and-counter-exposure", then the running tally is additionally weighted by the proportional difference as described in the equation (2) and (3) of the manuscript.
 
-## EXTENDING THE MODEL
+If the MODEL-ELECTION-CYCLE swith is set to "Yes", then (a) exposure-to-counter-media, (b) propensity-for-homophily, (c) media-influence-paramter, (d) social-influence-parameter, and (e) random-decay-parameter are changed through the election cycles as described in the Table 1 of the manuscript.
 
-Try other voting rules.
-
-Start with a nonrandom green-and-blue pattern. For example, one could make half of the world blue and half green.
-
-Can you enhance the model to incorporate multiple colors and multiple votes?  One might interpret shades of color to represent the degree of a patch's opinion about an issue: strongly against, against, neutral, etc.  Each patch could have more than two choices and weighted votes: blue patches' vote could count twice, etc.
-
-## RELATED MODELS
-
-Ising (a physics model, but the rules are very similar)
+If the MODEL-DROPOUT-BASED-ON-PREFERENCE-FOR-POLITICS swith is set to "Yes", then those who are politically disinterested (less than 0.3 based on 0 - 1 scale) are randomly drop out of the system, and new agents are comming in to the system.
 
 ## CREDITS AND REFERENCES
 
-This model is described in Rudy Rucker's "Artificial Life Lab", published in 1993 by Waite Group Press.
+This model is the extension and adaptation from Wilensky's (1998) voting model described in http://ccl.northwestern.edu/netlogo/models/Voting.
 
 ## HOW TO CITE
 
@@ -903,27 +895,18 @@ If you mention this model or the NetLogo software in a publication, we ask that 
 
 For the model itself:
 
-* Wilensky, U. (1998).  NetLogo Voting model.  http://ccl.northwestern.edu/netlogo/models/Voting.  Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
+NA
 
 Please cite the NetLogo software as:
 
-* Wilensky, U. (1999). NetLogo. http://ccl.northwestern.edu/netlogo/. Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
+NA
 
 ## COPYRIGHT AND LICENSE
-
-Copyright 1998 Uri Wilensky.
 
 ![CC BY-NC-SA 3.0](http://ccl.northwestern.edu/images/creativecommons/byncsa.png)
 
 This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 License.  To view a copy of this license, visit https://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to Creative Commons, 559 Nathan Abbott Way, Stanford, California 94305, USA.
 
-Commercial licenses are also available. To inquire about commercial licenses, please contact Uri Wilensky at uri@northwestern.edu.
-
-This model was created as part of the project: CONNECTED MATHEMATICS: MAKING SENSE OF COMPLEX PHENOMENA THROUGH BUILDING OBJECT-BASED PARALLEL MODELS (OBPML).  The project gratefully acknowledges the support of the National Science Foundation (Applications of Advanced Technologies Program) -- grant numbers RED #9552950 and REC #9632612.
-
-This model was converted to NetLogo as part of the projects: PARTICIPATORY SIMULATIONS: NETWORK-BASED DESIGN FOR SYSTEMS LEARNING IN CLASSROOMS and/or INTEGRATED SIMULATION AND MODELING ENVIRONMENT. The project gratefully acknowledges the support of the National Science Foundation (REPP & ROLE programs) -- grant numbers REC #9814682 and REC-0126227. Converted from StarLogoT to NetLogo, 2001.
-
-<!-- 1998 2001 -->
 @#$#@#$#@
 default
 true

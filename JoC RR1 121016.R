@@ -1,5 +1,5 @@
 
-## ANALYSIS AS OF July 29th.
+## ANALYSIS AS OF Dec 10th (JoC 1st Revise and Resubmit).
 require(ggplot2)
 require(grid)
 require(gridExtra)
@@ -11,7 +11,7 @@ require(parallel)
 
 # modify following path where appropriate
 nl.path <-  "C:/Program Files/NetLogo 5.3.1/app"
-model.path <- "C:/Users/USERNAME/Dropbox/GitHub/ABM/Model/Model 5.nlogo"
+model.path <- "C:/Users/Hyunjin/Dropbox/GitHub/ABM/Model/Model 6_strong attitudes.nlogo"
 gui <- F ## change to T if you want to see graphics
 source("helper-functions.R") ## load helper functions
 
@@ -44,45 +44,35 @@ cl <- makeCluster(processors, type="SOCK")
 clusterExport(cl,c("nsim","timestep"))
 
 ## load Netlogo in each processor/core
-parLapply(cl, 1:processors, pre_process, gui=gui,nl.path=nl.path, model.path=model.path)
+parLapply(cl, 1:processors, pre_process, gui=gui, nl.path=nl.path, model.path=model.path)
 
 
 ## model estimation
-result.par.model1 <- parLapply(cl, rand.seed, sim_model1)
-result.par.model1 <- lapply(1:100, function(k) { process.output(result.par.model1[[k]]) })
+result.par.model4.strong.attitudes <- parLapply(cl, rand.seed, sim_model4_strong_attitudes)
+result.par.model4.strong.attitudes <- lapply(1:100, function(k) { process.output(result.par.model4.strong.attitudes[[k]]) })
 
-result.par.model2 <- parLapply(cl, rand.seed, sim_model2)
-result.par.model2 <- lapply(1:100, function(k) { process.output(result.par.model2[[k]]) })
+result.par.model6.strong.attitudes <- parLapply(cl, rand.seed, sim_model6_strong_attitudes)
+result.par.model6.strong.attitudes <- lapply(1:100, function(k) { process.output(result.par.model6.strong.attitudes[[k]]) })
 
-result.par.model3 <- parLapply(cl, rand.seed, sim_model3)
-result.par.model3 <- lapply(1:100, function(k) { process.output(result.par.model3[[k]]) })
+# change the model
+model.path <- "C:/Users/Hyunjin/Dropbox/GitHub/ABM/Model/Model 6.nlogo"
+parLapply(cl, 1:processors, RNetLogo::NLLoadModel(), model.path=model.path)
 
-result.par.model4 <- parLapply(cl, rand.seed, sim_model4)
-result.par.model4 <- lapply(1:100, function(k) { process.output(result.par.model4[[k]]) })
 
-result.par.model5 <- parLapply(cl, rand.seed, sim_model5)
-result.par.model5 <- lapply(1:100, function(k) { process.output(result.par.model5[[k]]) })
-
-result.par.model6 <- parLapply(cl, rand.seed, sim_model6)
-result.par.model6 <- lapply(1:100, function(k) { process.output(result.par.model6[[k]]) })
-
-# Kill child processes when they are no longer needed
-parLapply(cl, 1:processors, postpro)
-stopCluster(cl)
 
 ## save raw output file for later use
 ## cf. this output file stores information as the list [nsim] -- list [timestep]
-save(result.par.model1,result.par.model2,result.par.model3,
-     result.par.model4,result.par.model5,result.par.model6,file="output.160723.Rdata")
+save(result.par.model4.strong.attitudes, result.par.model6.strong.attitudes, 
+     file="output.161210.strong.attitudes.Rdata")
 
 output.data <- list(result.par.model1,result.par.model2,result.par.model3,result.par.model4,
                     result.par.model5,result.par.model6)
 
 ## cf. data structure
 ## output.data -
-   # - model #1 to #6
-   # - simluation #1 to #100
-   # - data.frame # dim = c(1095,3), where row = time, col = variance, kurtosis, ER
+# - model #1 to #6
+# - simluation #1 to #100
+# - data.frame # dim = c(1095,3), where row = time, col = variance, kurtosis, ER
 
 ## mean of attitude distribution variance and kurtosis over 100 replication and its 95% CIs
 ## check with ggplot -- Figure 2 (variance and kurtosis combined)
@@ -119,7 +109,7 @@ plot.data <- data.frame(tick=c(rep(1:timestep,6),rep(1:timestep,6)),
                         ULCI=c(ULCI_var,ULCI_kur),
                         model=factor(
                           c(rep(1:6,each=timestep),rep(1:6,each=timestep))
-                          ),
+                        ),
                         variable=factor(rep(c("Variance","Kurtosis"),each=6*timestep)))
 levels(plot.data$variable) <- c("Variance", "Kurtosis")
 levels(plot.data$variable)
@@ -142,7 +132,7 @@ p <- lapply(1:6, function(i) {
     xlab("") + ylab("") + theme_minimal() +
     theme(legend.title = element_blank(), legend.position = "none") +
     scale_fill_manual(values=c("#999999","#666666"))
-
+  
   return(p)
 })
 
@@ -175,10 +165,10 @@ ULCI <- unlist(
     ,simplify=FALSE))
 
 plot.data2 <- data.frame(tick=rep(1:timestep,6),
-                        mean=mean,
-                        LLCI=LLCI,
-                        ULCI=ULCI,
-                        model=factor(rep(1:6,each=timestep)))
+                         mean=mean,
+                         LLCI=LLCI,
+                         ULCI=ULCI,
+                         model=factor(rep(1:6,each=timestep)))
 
 p2 <- lapply(1:6, function(i) {
   data <- plot.data2[plot.data2$model==i,]
@@ -187,7 +177,7 @@ p2 <- lapply(1:6, function(i) {
     geom_ribbon(aes(ymin=LLCI, ymax=ULCI),alpha=0.3) +
     xlab("") + ylab("") + theme_minimal() +
     theme(legend.title = element_blank(), legend.position = "none")
-
+  
   return(p)
 })
 
@@ -197,7 +187,7 @@ p2[[3]] <- p2[[3]] + theme(axis.text.x = element_blank())
 p2[[4]] <- p2[[4]] + theme(axis.text.x = element_blank())
 
 grid.arrange(p2[[1]],p2[[2]],p2[[3]],p2[[4]],p2[[5]],p2[[6]],
-                     ncol=2, nrow = 3)
+             ncol=2, nrow = 3)
 
 
 variance.plot <- print.ts.plot(output.data,"var")
@@ -206,12 +196,12 @@ variance.plot <- print.ts.plot(output.data,"var")
 ## create 3-dim array (time = 1095, replication = 100, model = 6)
 ## out.array[[1]] == variance, out.array[[2]] == kurtosis, out.array[[3]] == ERindex
 out.array <- lapply(1:3, function(k) {
-val <- lapply(1:6,function(i) {
-  val <- array((do.call("rbind",output.data[[i]]))[,k],dim=c(1095,100))
-})
-val <- do.call("cbind",val)
-val <- array(val,dim=c(1095,100,6))
-return(val)
+  val <- lapply(1:6,function(i) {
+    val <- array((do.call("rbind",output.data[[i]]))[,k],dim=c(1095,100))
+  })
+  val <- do.call("cbind",val)
+  val <- array(val,dim=c(1095,100,6))
+  return(val)
 })
 
 names(out.array) <- c("variance","kurtosis","ER")

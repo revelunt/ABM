@@ -81,27 +81,27 @@ to go
   [
   ;; during election
   if (ticks = 91 or ticks = 456 or ticks = 821) [
-                  set media-influence-parameter 0.5
-                  set social-influence-parameter 0.5
+                  set media-influence-parameter 0.25  ;; for strong attitudes, we posit that media's influence on attitude tally is less prevalent (e.g., 0.5 -> 0.25)
+                  set social-influence-parameter 0.25 ;; same here
                   set propensity-for-homophily 0.6
                   set exposure-to-counter-media 0.6 ]
 
   ;; after election
   if (ticks = 274 or ticks = 639 or ticks = 1004) [
-                   set media-influence-parameter 0.4
-                   set social-influence-parameter 0.4
+                   set media-influence-parameter 0.2
+                   set social-influence-parameter 0.2
                    set propensity-for-homophily 0.5
                    set exposure-to-counter-media 0.5]
   if (ticks = 292 or ticks = 657 or ticks = 1022) [
-                   set media-influence-parameter 0.3
-                   set social-influence-parameter 0.3
+                   set media-influence-parameter 0.15
+                   set social-influence-parameter 0.15
                    set propensity-for-homophily 0.4
                    set exposure-to-counter-media 0.4 ]
 
   ;; approaching election
   if (ticks = 438 or ticks = 803) [
-                   set media-influence-parameter 0.35
-                   set social-influence-parameter 0.35
+                   set media-influence-parameter 0.175
+                   set social-influence-parameter 0.175
                    set propensity-for-homophily 0.4
                    set exposure-to-counter-media 0.4 ]
 
@@ -638,7 +638,7 @@ exposure-to-counter-media
 exposure-to-counter-media
 0
 1
-0.4
+0.6
 0.05
 1
 NIL
@@ -692,7 +692,7 @@ propensity-for-homophily
 propensity-for-homophily
 0
 1
-0.4
+0.6
 0.1
 1
 NIL
@@ -707,7 +707,7 @@ social-influence-parameter
 social-influence-parameter
 0
 1
-0.3
+0.5
 0.05
 1
 NIL
@@ -722,7 +722,7 @@ media-influence-parameter
 media-influence-parameter
 0
 1
-0.3
+0.5
 0.05
 1
 NIL
@@ -757,7 +757,7 @@ random-decay-parameter
 random-decay-parameter
 0
 1
-0.2
+0.1
 0.05
 1
 NIL
