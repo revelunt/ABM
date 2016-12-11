@@ -11,7 +11,7 @@ require(parallel)
 
 # modify following path where appropriate
 nl.path <-  "C:/Program Files/NetLogo 5.3.1/app"
-model.path <- "C:/Users/Hyunjin/Dropbox/GitHub/ABM/Model/Model 6_strong attitudes.nlogo"
+model.path <- "C:/Users/Hyunjin/Dropbox/GitHub/ABM/Model/Model 6.nlogo"
 gui <- F ## change to T if you want to see graphics
 source("helper-functions.R") ## load helper functions
 
@@ -54,16 +54,44 @@ result.par.model4.strong.attitudes <- lapply(1:100, function(k) { process.output
 result.par.model6.strong.attitudes <- parLapply(cl, rand.seed, sim_model6_strong_attitudes)
 result.par.model6.strong.attitudes <- lapply(1:100, function(k) { process.output(result.par.model6.strong.attitudes[[k]]) })
 
-# change the model
-model.path <- "C:/Users/Hyunjin/Dropbox/GitHub/ABM/Model/Model 6.nlogo"
-parLapply(cl, 1:processors, RNetLogo::NLLoadModel(), model.path=model.path)
+save(result.par.model4.strong.attitudes, result.par.model6.strong.attitudes, 
+     file="output.161210.strong.attitudes.Rdata")
 
+# change the model
+# model.path <- "C:/Users/Hyunjin/Dropbox/GitHub/ABM/Model/Model 6.nlogo"
+# parLapply(cl, 1:processors, RNetLogo::NLLoadModel(), model.path=model.path)
+
+results.par.model4.indirect.exposure <- parLapply(cl, rand.seed, sim_model4_indirect_exposure)
+results.par.model4.indirect.exposure <- lapply(1:100, function(k) { process.output(results.par.model4.indirect.exposure[[k]]) })
+
+results.par.model6.indirect.exposure <- parLapply(cl, rand.seed, sim_model6_indirect_exposure)
+results.par.model6.indirect.exposure <- lapply(1:100, function(k) { process.output(results.par.model6.indirect.exposure[[k]]) })
+
+save(results.par.model4.indirect.exposure, results.par.model6.indirect.exposure, 
+     file="output.161211.indirect.exposure.Rdata")
+
+results.par.model4.european.cases <- parLapply(cl, rand.seed, sim_model4_european_cases)
+results.par.model4.european.cases <- lapply(1:100, function(k) { process.output(results.par.model4.european.cases[[k]]) })
+
+results.par.model6.european.cases <- parLapply(cl, rand.seed, sim_model6_european_cases)
+results.par.model6.european.cases <- lapply(1:100, function(k) { process.output(results.par.model6.european.cases[[k]]) })
+
+save(results.par.model4.european.cases, results.par.model6.european.cases, 
+     file="output.161211.european.cases.Rdata")
+
+results.par.model4.interest.pro.avoid.interaction <- parLapply(cl, rand.seed, sim_model4_pro_interest_interaction_and_avoidance)
+results.par.model4.interest.pro.avoid.interaction <- lapply(1:100, function(k) { process.output(results.par.model4.interest.pro.avoid.interaction[[k]]) })
+
+results.par.model6.interest.pro.avoid.interaction <- parLapply(cl, rand.seed, sim_model6_pro_interest_interaction_and_avoidance)
+results.par.model6.interest.pro.avoid.interaction <- lapply(1:100, function(k) { process.output(results.par.model6.interest.pro.avoid.interaction[[k]]) })
+
+save(results.par.model4.interest.pro.avoid.interaction, results.par.model6.interest.pro.avoid.interaction, 
+     file="output.161211.interest.pro.avoid.interaction.Rdata")
 
 
 ## save raw output file for later use
 ## cf. this output file stores information as the list [nsim] -- list [timestep]
-save(result.par.model4.strong.attitudes, result.par.model6.strong.attitudes, 
-     file="output.161210.strong.attitudes.Rdata")
+
 
 output.data <- list(result.par.model1,result.par.model2,result.par.model3,result.par.model4,
                     result.par.model5,result.par.model6)

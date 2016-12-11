@@ -550,8 +550,13 @@ to-report ER.pol.index [variable] ;; variable = attitudes
   set ind_p length equal-to 0 variable / length variable
   set dem_p length greater-than 0 variable / length variable
 
-  set rep_mu mean less-than 0 variable
-  set dem_mu mean greater-than 0 variable
+  ifelse rep_p > 0
+  [set rep_mu mean less-than 0 variable]
+  [set rep_mu 0]
+
+  ifelse dem_p > 0
+  [set dem_mu mean greater-than 0 variable]
+  [set dem_mu 0]
 
   let ERindex (  (rep_p ^ 2) * ind_p * euclidean-distance less-than 0 variable equal-to 0 variable +
                  (rep_p ^ 2) * dem_p * euclidean-distance less-than 0 variable greater-than 0 variable +
@@ -589,8 +594,8 @@ GRAPHICS-WINDOW
 49
 0
 49
-1
-1
+0
+0
 1
 ticks
 30.0
@@ -638,7 +643,7 @@ exposure-to-counter-media
 exposure-to-counter-media
 0
 1
-0.4
+0.6
 0.05
 1
 NIL
@@ -692,7 +697,7 @@ propensity-for-homophily
 propensity-for-homophily
 0
 1
-0.4
+0.6
 0.1
 1
 NIL
@@ -707,7 +712,7 @@ social-influence-parameter
 social-influence-parameter
 0
 1
-0.3
+0.5
 0.05
 1
 NIL
@@ -722,7 +727,7 @@ media-influence-parameter
 media-influence-parameter
 0
 1
-0.3
+0.5
 0.05
 1
 NIL
@@ -812,7 +817,7 @@ exposure-to-pro-media
 exposure-to-pro-media
 0
 1
-1
+0.5
 0.1
 1
 NIL
@@ -854,7 +859,7 @@ INPUTBOX
 160
 179
 custom-random-seed
-55555
+2631
 1
 0
 Number
@@ -956,7 +961,6 @@ NA
 ![CC BY-NC-SA 3.0](http://ccl.northwestern.edu/images/creativecommons/byncsa.png)
 
 This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 License.  To view a copy of this license, visit https://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to Creative Commons, 559 Nathan Abbott Way, Stanford, California 94305, USA.
-
 @#$#@#$#@
 default
 true
