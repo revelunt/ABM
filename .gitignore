@@ -25,3 +25,7 @@ NetLogo 5.3.1/
 
 
 .Rproj.user
+
+.RData
+
+*.sav
