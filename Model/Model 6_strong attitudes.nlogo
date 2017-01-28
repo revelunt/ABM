@@ -492,9 +492,9 @@ to-report kurtosis [variable]
   let n (length variable)
   let mu (mean variable)
 
-  let x map [ ? - mu ] variable
+  let x map [ [?1] -> ?1 - mu ] variable
 
-  let r (  n * sum ( map [ ? ^ 4 ] x) / ((sum ( map [ ? ^ 2] x)) ^ 2)  )
+  let r (  n * sum ( map [ [?1] -> ?1 ^ 4 ] x) / ((sum ( map [ [?1] -> ?1 ^ 2 ] x)) ^ 2)  )
 
   let kurt ( ((n + 1) * (r - 3) + 6) * (n - 1)/((n - 2) * (n - 3)) )
   report kurt
@@ -502,17 +502,17 @@ to-report kurtosis [variable]
 end
 
 to-report less-than [num lst]
-  let newlist filter [? < num] lst
+  let newlist filter [ [?1] -> ?1 < num ] lst
   report newlist
 end
 
 to-report equal-to [num lst]
-  let newlist filter [? = num] lst
+  let newlist filter [ [?1] -> ?1 = num ] lst
   report newlist
 end
 
 to-report greater-than [num lst]
-  let newlist filter [? > num] lst
+  let newlist filter [ [?1] -> ?1 > num ] lst
   report newlist
 end
 
@@ -525,7 +525,7 @@ to-report euclidean-distance [lst1 lst2]  ;; report mean pairwise-distance of ev
 
    while [ i < n]
    [ let val item i lst1
-     set sum_total sum_total + sum (map [ abs(val - ?)] lst2)
+     set sum_total sum_total + sum (map [ [?1] -> abs(val - ?1) ] lst2)
      set i (i + 1)
    ]
 
@@ -576,8 +576,8 @@ end
 GRAPHICS-WINDOW
 174
 10
-544
-401
+542
+379
 -1
 -1
 7.2
@@ -655,7 +655,7 @@ INPUTBOX
 82
 115
 world-size-x
-50
+50.0
 1
 0
 Number
@@ -666,7 +666,7 @@ INPUTBOX
 159
 116
 world-size-y
-50
+50.0
 1
 0
 Number
@@ -817,7 +817,7 @@ exposure-to-pro-media
 exposure-to-pro-media
 0
 1
-1
+1.0
 0.1
 1
 NIL
@@ -859,7 +859,7 @@ INPUTBOX
 160
 179
 custom-random-seed
-55555
+55555.0
 1
 0
 Number
@@ -1243,9 +1243,8 @@ false
 0
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
-
 @#$#@#$#@
-NetLogo 5.3.1
+NetLogo 6.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
@@ -1261,7 +1260,6 @@ true
 0
 Line -7500403 true 150 150 90 180
 Line -7500403 true 150 150 210 180
-
 @#$#@#$#@
 0
 @#$#@#$#@
