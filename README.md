@@ -1,5 +1,5 @@
 # A replication code for "An Agent-based model of reinforcing spirals"
-This repository contains a set of replication codes to accompany the article entitled ["Dynamic spirals put to test: An agent-based model of reinforcing spirals between selective exposure, interpersonal networks, and attitude polarization,"](http://hyunjinsong.com/supplements/ABM_JOC_FINAL.pdf) forthcomming in Journal of Communication, written by [Hyunjin Song](http://www.hyunjinsong.com) and [Hajo G. Boomgaarden](https://http://www.hajoboomgaarden.com/Hajo_Boomgaarden/Work.html) (Department of Communication, University of Vienna).
+This repository contains a set of replication codes to accompany the article entitled ["Dynamic spirals put to test: An agent-based model of reinforcing spirals between selective exposure, interpersonal networks, and attitude polarization,"](http://dx.doi.org/10.1111/jcom.12288) published in Journal of Communication, written by [Hyunjin Song](http://www.hyunjinsong.com) and [Hajo G. Boomgaarden](https://http://www.hajoboomgaarden.com/Hajo_Boomgaarden/Work.html) (Department of Communication, University of Vienna).
 
 This repository includes:
 
